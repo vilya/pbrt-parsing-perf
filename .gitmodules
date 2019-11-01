@@ -1,0 +1,9 @@
+[submodule "3rdparty/pbrt-parser"]
+	path = 3rdparty/pbrt-parser
+	url = https://github.com/ingowald/pbrt-parser.git
+[submodule "3rdparty/pieces"]
+	path = 3rdparty/pieces
+	url = git@github.com:vilya/pieces.git
+[submodule "3rdparty/minipbrt"]
+	path = 3rdparty/minipbrt
+	url = git@github.com:vilya/minipbrt.git
