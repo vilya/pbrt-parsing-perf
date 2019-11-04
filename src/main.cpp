@@ -35,13 +35,58 @@ static const vh::CommandLineOption options[] = {
 
 namespace vh {
 
-  struct Result {
-    const char* filename;
-    double minipbrtSecs;
-    double pbrtparserSecs;
-    bool minipbrtOK;
-    bool pbrtparserOK;
+  typedef bool (*ParserFunc)(const char* filename, double& parsingSecsOut);
+
+
+  static bool null_parser(const char* filename, double& parsingSecsOut);
+  static bool parse_with_minipbrt(const char* filename, double& parsingSecsOut);
+  static bool parse_with_pbrtparser(const char* filename, double& parsingSecsOut);
+
+
+  enum ParserID {
+    eMiniPBRT,
+    ePBRTParser,
   };
+  static const uint32_t kNumParsers = uint32_t(ePBRTParser) + 1;
+
+
+  static const char* kParserNames[] = {
+    "minipbrt",
+    "pbrt-parser",
+  };
+
+
+  static const ParserFunc kParsers[] = {
+    parse_with_minipbrt,
+    parse_with_pbrtparser,
+  };
+
+
+  struct Result {
+    std::string filename;
+    double secs[kNumParsers];
+    bool ok[kNumParsers];
+  };
+
+
+  // Doesn't do any parsing, just reads the whole file as quickly as possible.
+  // This is just used to pre-warm the file cache before the other parsers run.
+  static bool null_parser(const char* filename)
+  {
+    FILE* f = nullptr;
+    if (fopen_s(&f, filename, "rb") != 0) {
+      return false;
+    }
+    const size_t bufLen = 1024 * 1024 - 1;
+    char* buffer = new char[bufLen + 1];
+    buffer[bufLen] = '\0';
+    while (fread(buffer, sizeof(char), bufLen, f) == bufLen) {
+      continue;
+    }
+    delete[] buffer;
+    fclose(f);
+    return  true;
+  }
 
 
   static bool parse_with_minipbrt(const char* filename, double& parsingSecsOut)
@@ -80,30 +125,44 @@ namespace vh {
   }
 
 
-  static void print_header(int filenameWidth, bool minipbrtEnabled, bool pbrtparserEnabled)
+  static void parse(const char* filename, const bool enabled[kNumParsers], Result& result)
+  {
+    result.filename = filename;
+    null_parser(filename);
+    for (uint32_t p = 0; p < kNumParsers; p++) {
+      if (!enabled[p]) {
+        continue;
+      }
+      printf("Parsing %s with %s...\n", filename, kParserNames[p]);
+      fflush(stdout);
+      result.ok[p] = kParsers[p](filename, result.secs[p]);
+    }
+  }
+
+
+  static void print_header(int filenameWidth, const bool enabled[kNumParsers])
   {
     printf("%-*s", filenameWidth, "Filename");
-    if (minipbrtEnabled) {
-      printf("  %12s", "minipbrt");
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (enabled[i]) {
+        printf("  %12s", kParserNames[i]);
+      }
     }
-    if (pbrtparserEnabled) {
-      printf("  %12s", "pbrt-parser");
-    }
-    if (minipbrtEnabled && pbrtparserEnabled) {
-      printf("  %12s", "speedup");
+
+    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
+      printf("  %12s", "Speedup");
     }
     printf("\n");
 
     for (int i = 0; i < filenameWidth; i++) {
       fputc('-', stdout);
     }
-    if (minipbrtEnabled) {
-      printf("  ------------");
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (enabled[i]) {
+        printf("  ------------");
+      }
     }
-    if (pbrtparserEnabled) {
-      printf("  ------------");
-    }
-    if (minipbrtEnabled && pbrtparserEnabled) {
+    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
       printf("  ------------");
     }
     printf("\n");
@@ -112,31 +171,25 @@ namespace vh {
   }
 
 
-  static void print_result(const Result* result, int filenameWidth, bool minipbrtEnabled, bool pbrtparserEnabled)
+  static void print_result(const Result& result, int filenameWidth, const bool enabled[kNumParsers])
   {
-    printf("%-*s", filenameWidth, result->filename);
+    printf("%-*s", filenameWidth, result.filename.c_str());
 
-    if (minipbrtEnabled) {
-      if (result->minipbrtOK) {
-        printf("  %12.3lf", result->minipbrtSecs);
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (!enabled[i]) {
+        continue;
+      }
+      if (result.ok[i]) {
+        printf("  %12.3lf", result.secs[i]);
       }
       else {
         printf("  %12s", "failed");
       }
     }
 
-    if (pbrtparserEnabled) {
-      if (result->pbrtparserOK) {
-        printf("  %12.3lf", result->pbrtparserSecs);
-      }
-      else {
-        printf("  %12s", "failed");
-      }
-    }
-
-    if (minipbrtEnabled && pbrtparserEnabled) {
-      if (result->minipbrtOK && result->pbrtparserOK) {
-        double speedup = result->pbrtparserSecs / result->minipbrtSecs;
+    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
+      if (result.ok[eMiniPBRT] && result.ok[ePBRTParser]) {
+        double speedup = result.secs[ePBRTParser] / result.secs[eMiniPBRT];
         printf("  %11.2lfx", speedup);
       }
       else {
@@ -148,54 +201,51 @@ namespace vh {
   }
 
 
-  static void print_results(const Result results[], int numResults, bool minipbrtEnabled, bool pbrtparserEnabled)
+  static void print_results(const std::vector<Result> results, const bool enabled[kNumParsers])
   {
     int filenameWidth = 0;
-    for (int i = 0; i < numResults; i++) {
-      int newWidth = static_cast<int>(strlen(results[i].filename));
+    for (const Result& result : results) {
+      int newWidth = static_cast<int>(result.filename.size());
       if (newWidth > filenameWidth) {
         filenameWidth = newWidth;
       }
     }
 
-    print_header(filenameWidth, minipbrtEnabled, pbrtparserEnabled);
-    for (int i = 0; i < numResults; i++) {
-      print_result(results + i, filenameWidth, minipbrtEnabled, pbrtparserEnabled);
+    print_header(filenameWidth, enabled);
+    for (const Result& result : results) {
+      print_result(result, filenameWidth, enabled);
     }
   }
 
 
-  static void print_results_as_csv(const Result results[], int numResults, bool minipbrtEnabled, bool pbrtparserEnabled)
+  static void print_results_as_csv(const std::vector<Result> results, const bool enabled[kNumParsers])
   {
     printf("\"Filename\"");
-    if (minipbrtEnabled) {
-      printf(", \"minipbrt\"");
-    }
-    if (pbrtparserEnabled) {
-      printf(", \"pbrt-parser\"");
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (enabled[i]) {
+        printf(", \"%s\"", kParserNames[i]);
+      }
     }
     printf("\n");
 
     printf("\n");
 
-    for (int i = 0; i < numResults; i++) {
-      printf("\"%s\"", results[i].filename);
-      if (minipbrtEnabled) {
-        if (results->minipbrtOK) {
-          printf(", %lf", results->minipbrtSecs);
+    for (const Result& result : results) {
+      printf("\"%s\"", result.filename.c_str());
+
+      for (uint32_t i = 0; i < kNumParsers; i++) {
+        if (!enabled[i]) {
+          continue;
+        }
+
+        if (result.ok[i]) {
+          printf(", %lf", result.secs[i]);
         }
         else {
           printf(", \"failed\"");
         }
       }
-      if (pbrtparserEnabled) {
-        if (results->minipbrtOK) {
-          printf(", %lf", results->minipbrtSecs);
-        }
-        else {
-          printf(", \"failed\"");
-        }
-      }
+
       printf("\n");
     }
   }
@@ -207,8 +257,7 @@ int main(int argc, char** argv)
 {
   using namespace vh;
 
-  bool minipbrtEnabled = true;
-  bool pbrtparserEnabled = true;
+  bool enabled[kNumParsers] = { true, true };
   bool printAsCSV = false;
 
   int argi = 1;
@@ -225,11 +274,11 @@ int main(int argc, char** argv)
         return 0;
 
       case eNoMiniPBRT:
-        minipbrtEnabled = false;
+        enabled[eMiniPBRT] = false;
         break;
 
       case eNoPBRTParser:
-        pbrtparserEnabled = false;
+        enabled[ePBRTParser] = false;
         break;
 
       case eCSV:
@@ -259,29 +308,36 @@ int main(int argc, char** argv)
   // Process the files, building up a table of results. We don't just print the
   // results out as we go because pbrt-parser prints some intermediate output
   // which messes up our formatting.
-  int numResults = argc - 1;
-  Result* results = new Result[numResults];
+  std::vector<Result> results;
+  results.reserve(static_cast<size_t>(argc - 1));
+
+  const int kFilenameBufferLen = 16 * 1024 - 1;
+  char* filenameBuffer = new char[kFilenameBufferLen + 1];
+  filenameBuffer[kFilenameBufferLen] = '\0';
+
   for (int i = 1; i < argc; i++) {
-    Result* result = &results[i - 1];
-    result->filename = argv[i];
-    if (minipbrtEnabled) {
-      printf("Parsing %s with minipbrt...\n", result->filename);
-      fflush(stdout);
-      result->minipbrtOK = parse_with_minipbrt(result->filename, result->minipbrtSecs);
+    if (argv[i][0] == '@') {
+      FILE* f = nullptr;
+      if (fopen_s(&f, argv[i] + 1, "r") == 0) {
+        while (fgets(filenameBuffer, kFilenameBufferLen, f)) {
+          results.push_back(Result{});
+          parse(filenameBuffer, enabled, results.back());
+        }
+        fclose(f);
+      }
     }
-    if (pbrtparserEnabled) {
-      printf("Parsing %s with pbrt-parser...\n", result->filename);
-      fflush(stdout);
-      result->pbrtparserOK = parse_with_pbrtparser(result->filename, result->pbrtparserSecs);
+    else {
+      results.push_back(Result{});
+      parse(argv[i], enabled, results.back());
     }
   }
   printf("Parsing complete!\n\n");
 
   if (printAsCSV) {
-    print_results_as_csv(results, numResults, minipbrtEnabled, pbrtparserEnabled);
+    print_results_as_csv(results, enabled);
   }
   else {
-    print_results(results, numResults, minipbrtEnabled, pbrtparserEnabled);
+    print_results(results, enabled);
   }
   return EXIT_SUCCESS;
 }
