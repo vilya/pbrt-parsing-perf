@@ -95,7 +95,9 @@ namespace vh {
 
     minipbrt::Parser parser;
     bool ok = parser.parse(filename);
-    
+    if (ok) {
+      ok = parser.borrow_scene()->load_all_ply_meshes();
+    }
     timer.stop();
     parsingSecsOut = timer.elapsedSecs();
 
