@@ -66,8 +66,7 @@ The laptop used for the results below was:
 Results for Disney's Moana island scene
 ---------------------------------------
 
-Source:
-
+Source: https://www.technology.disneyanimation.com/islandscene
 - The disk cache was not prewarmed for these comparisons. The data set is so
   large that whether the data was previously present in the disk cache has 
   very little impact on the overall times.
