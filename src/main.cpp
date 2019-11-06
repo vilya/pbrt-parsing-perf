@@ -20,6 +20,7 @@ enum CmdLineOption {
   eVersion,
   eNoMiniPBRT,
   eNoPBRTParser,
+  eNoPrewarm,
   eCSV,
 };
 
@@ -28,6 +29,7 @@ static const vh::CommandLineOption options[] = {
   { eVersion,           'v',  "version",       nullptr, nullptr, "Print the application version and exit."                   },
   { eNoMiniPBRT,        '\0', "no-minipbrt",   nullptr, nullptr, "Disable minpbrt parsing."                                  },
   { eNoPBRTParser,      '\0', "no-pbrtparser", nullptr, nullptr, "Disable pbrt-parser parsing."                              },
+  { eNoPrewarm,         '\0', "no-prewarm",    nullptr, nullptr, "Don't pre-warm the disk cache before parsing (useful for very large scenes)." },
   { eCSV,               '\0', "csv",           nullptr, nullptr, "Format output as CSV, for easy import into a spreadsheet." },
   { vh::kUnknownOption, '\0', nullptr,         nullptr, nullptr, nullptr                                                     }
 };
@@ -38,28 +40,28 @@ namespace vh {
   typedef bool (*ParserFunc)(const char* filename, double& parsingSecsOut);
 
 
-  static bool null_parser(const char* filename, double& parsingSecsOut);
+  static bool prewarm_parser(const char* filename);
   static bool parse_with_minipbrt(const char* filename, double& parsingSecsOut);
   static bool parse_with_pbrtparser(const char* filename, double& parsingSecsOut);
 
 
   enum ParserID {
-    eMiniPBRT,
     ePBRTParser,
+    eMiniPBRT,
   };
-  static const uint32_t kNumParsers = uint32_t(ePBRTParser) + 1;
 
 
   static const char* kParserNames[] = {
-    "minipbrt",
     "pbrt-parser",
+    "minipbrt",
   };
 
 
   static const ParserFunc kParsers[] = {
-    parse_with_minipbrt,
     parse_with_pbrtparser,
+    parse_with_minipbrt,
   };
+  static const uint32_t kNumParsers = sizeof(kParsers) / sizeof(kParsers[0]);
 
 
   struct Result {
@@ -69,23 +71,39 @@ namespace vh {
   };
 
 
-  // Doesn't do any parsing, just reads the whole file as quickly as possible.
-  // This is just used to pre-warm the file cache before the other parsers run.
-  static bool null_parser(const char* filename)
+  // Read the PBRT file and any additional files it references, so that they're
+  // likely to be in the OS's disk cache when we run the parsing performance
+  // tests. We use minipbrt for this, but just read any PLY files into memory
+  // and discard them rather than loading them into triangle meshes.
+  static bool prewarm_parser(const char* filename)
   {
-    FILE* f = nullptr;
-    if (fopen_s(&f, filename, "rb") != 0) {
+    minipbrt::Parser parser;
+    bool ok = parser.parse(filename);
+    if (!ok) {
       return false;
     }
+
     const size_t bufLen = 1024 * 1024 - 1;
     char* buffer = new char[bufLen + 1];
     buffer[bufLen] = '\0';
-    while (fread(buffer, sizeof(char), bufLen, f) == bufLen) {
-      continue;
+
+    const minipbrt::Scene* scene = parser.borrow_scene();
+    for (uint32_t i = 0, endI = scene->shapes.size(); i < endI; i++) {
+      if (scene->shapes[i]->type() == minipbrt::ShapeType::PLYMesh) {
+        const minipbrt::PLYMesh* plymesh = dynamic_cast<const minipbrt::PLYMesh*>(scene->shapes[i]);
+        FILE* f = nullptr;
+        if (fopen_s(&f, plymesh->filename, "rb") != 0) {
+          continue;
+        }
+        while (fread(buffer, sizeof(char), bufLen, f) == bufLen) {
+          continue;
+        }
+        fclose(f);
+      }
     }
+
     delete[] buffer;
-    fclose(f);
-    return  true;
+    return true;
   }
 
 
@@ -127,10 +145,12 @@ namespace vh {
   }
 
 
-  static void parse(const char* filename, const bool enabled[kNumParsers], Result& result)
+  static void parse(const char* filename, const bool enabled[kNumParsers], bool prewarm, Result& result)
   {
     result.filename = filename;
-    null_parser(filename);
+    if (prewarm) {
+      prewarm_parser(filename);
+    }
     for (uint32_t p = 0; p < kNumParsers; p++) {
       if (!enabled[p]) {
         continue;
@@ -260,6 +280,7 @@ int main(int argc, char** argv)
   using namespace vh;
 
   bool enabled[kNumParsers] = { true, true };
+  bool prewarm = true;
   bool printAsCSV = false;
 
   int argi = 1;
@@ -281,6 +302,10 @@ int main(int argc, char** argv)
 
       case eNoPBRTParser:
         enabled[ePBRTParser] = false;
+        break;
+
+      case eNoPrewarm:
+        prewarm = false;
         break;
 
       case eCSV:
@@ -323,14 +348,14 @@ int main(int argc, char** argv)
       if (fopen_s(&f, argv[i] + 1, "r") == 0) {
         while (fgets(filenameBuffer, kFilenameBufferLen, f)) {
           results.push_back(Result{});
-          parse(filenameBuffer, enabled, results.back());
+          parse(filenameBuffer, enabled, prewarm, results.back());
         }
         fclose(f);
       }
     }
     else {
       results.push_back(Result{});
-      parse(argv[i], enabled, results.back());
+      parse(argv[i], enabled, prewarm, results.back());
     }
   }
   printf("Parsing complete!\n\n");
