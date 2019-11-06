@@ -80,7 +80,7 @@ Source: https://www.technology.disneyanimation.com/islandscene
 
 | Filename                                         |  pbrt-parser |     minipbrt |      Speedup |
 | :----------------------------------------------- | -----------: | -----------: | -----------: |
-| island/pbrt/island.pbrt                          |     5387.676 |      177.581 |       30.34x |
+| island/pbrt/island.pbrt                          |     5387.676 |      183.550 |       29.35x |
 
 
 
