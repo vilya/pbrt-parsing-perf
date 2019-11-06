@@ -164,30 +164,32 @@ namespace vh {
 
   static void print_header(int filenameWidth, const bool enabled[kNumParsers])
   {
-    printf("%-*s", filenameWidth, "Filename");
+    printf("| %-*s ", filenameWidth, "Filename");
     for (uint32_t i = 0; i < kNumParsers; i++) {
       if (enabled[i]) {
-        printf("  %12s", kParserNames[i]);
+        printf("| %12s ", kParserNames[i]);
       }
     }
-
     if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
-      printf("  %12s", "Speedup");
+      printf("| %12s ", "Speedup");
     }
-    printf("\n");
+    printf("|\n");
 
-    for (int i = 0; i < filenameWidth; i++) {
+    printf("| :");
+    for (int i = 0; i < filenameWidth - 1; i++) {
       fputc('-', stdout);
     }
+    fputc(' ', stdout);
+
     for (uint32_t i = 0; i < kNumParsers; i++) {
       if (enabled[i]) {
-        printf("  ------------");
+        printf("| -----------: ");
       }
     }
     if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
-      printf("  ------------");
+      printf("| -----------: ");
     }
-    printf("\n");
+    printf("|\n");
 
     fflush(stdout);
   }
@@ -195,31 +197,31 @@ namespace vh {
 
   static void print_result(const Result& result, int filenameWidth, const bool enabled[kNumParsers])
   {
-    printf("%-*s", filenameWidth, result.filename.c_str());
+    printf("| %-*s ", filenameWidth, result.filename.c_str());
 
     for (uint32_t i = 0; i < kNumParsers; i++) {
       if (!enabled[i]) {
         continue;
       }
       if (result.ok[i]) {
-        printf("  %12.3lf", result.secs[i]);
+        printf("| %12.3lf ", result.secs[i]);
       }
       else {
-        printf("  %12s", "failed");
+        printf("| %12s ", "failed");
       }
     }
 
     if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
       if (result.ok[eMiniPBRT] && result.ok[ePBRTParser]) {
         double speedup = result.secs[ePBRTParser] / result.secs[eMiniPBRT];
-        printf("  %11.2lfx", speedup);
+        printf("| %11.2lfx ", speedup);
       }
       else {
-        printf("  %12c", '-');
+        printf("| %12c ", '-');
       }
     }
 
-    printf("\n");
+    printf("|\n");
   }
 
 
