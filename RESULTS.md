@@ -4,8 +4,7 @@ Results from pbrt-parsing-perf
 Differences between minipbrt and pbrt-parser
 --------------------------------------------
 
-
-pbrt-parser and minipbrt have different approaches to handling PLY files:
+*pbrt-parser* and *minipbrt* have different approaches to handling PLY files:
 
 - pbrt-parser transparently loads them into a triangle mesh primitive.
 - minipbrt creates a PLYMesh primitive and provides optional helper methods
@@ -14,29 +13,26 @@ pbrt-parser and minipbrt have different approaches to handling PLY files:
 In the interests of making the comparison as fair as possible, we're loading
 all PLY files using the helper methods that minipbrt provides.
 
-minipbrt supports the entire PBRTv3 file format, wheeras pbrt-parser only
-supports a (useful, common) subset of it. The subset supported by pbrt-parser
-is:
-- Shapes: trianglemesh, curve, sphere and disk only (plus its own
-  non-standard, but very useful, quadmesh type).
-- Materials: everything except hair and kdsubsurface.
-- Textures: everything except bilerp, dots and uv. Not sure whether it supports
-  3D textures - it doesn't seem to store the world-to-texture transform. Likewise
-  it doesn't store any of the common 2D texture parameters (uscale, vscale, udelta,
-  vdelta, v1 and v2).
-- Lights: infinite and distant only.
-- Area lights: diffuse, with a special type for diffuse defined as a blackbody.
-- Mediums: none.
+At time of writing, *minipbrt* and *pbrt-parser* support different subsets of
+the PBRTv3 file format. *minipbrt* supports the entire format with the
+exception of per-shape material overrides. *pbrt-parser* only supports the 
+more commonly used parts of the format:
+- `trianglemesh`, `curve`, `sphere` and `disk` shapes, plus a non-standard 
+  `quadmesh` shape.
+- All materials except `hair` and `kdsubsurface`.
+- All texture types except `bilerp`, `dots` and `uv`.
+  - I'm not sure whether *pbrt-parser* supports 3D textures - it doesn't seem 
+    to store the world-to-texture transform.
+  - Likewise, it doesn't seem to store the common 2D texture parameters
+    (`uscale`, `vscale`, `udelta`, `vdelta`, `v1` and `v2`).
+- `infinite` and `distant` lights only.
+- `diffuse` area lights (the only type there is), with a special class for
+  diffuse area lights with an emission spectrum defined as a blackbody.
+- No mediums.
 
-pbrt-parser allows per-shape material overrides, whicih minipbrt doesn't yet
-support.
-
-Both parsers convert spectral data to rgb.
-
-minipbrt automatically converts blackbodies to rgb. pbrt-parser does not (but
-provides a method for doing it).
-
-Times for each parser are in seconds.
+Both parsers convert spectral data to rgb. *minipbrt* automatically converts
+blackbodies to rgb. *pbrt-parser* doesn't by default but provides a method for
+doing it).
 
 
 Points of interest
@@ -67,6 +63,8 @@ The laptop used for the results below was:
 - Intel Core i7-6700HQ CPU, 2.6 GHz
 - 16 GB Dual-channel DDR4 RAM
 - Samsung MZVPV512 SSD, theoretical peak read speed of 1165 MB/s
+
+All times reported below are in seconds.
 
 
 Results for Disney's Moana island scene
