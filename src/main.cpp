@@ -3,9 +3,10 @@
 #include <vh_cmdline.h>
 #include <vh_time.h>
 
+#include <atomic>
 #include <cstdio>
 #include <string>
-
+#include <thread>
 
 //
 // Constants
@@ -19,6 +20,7 @@ enum CmdLineOption {
   eHelp,
   eVersion,
   eNoMiniPBRT,
+  eNoThreaded,
   eNoPBRTParser,
   eNoPrewarm,
   eCSV,
@@ -28,6 +30,7 @@ static const vh::CommandLineOption options[] = {
   { eHelp,              'h',  "help",          nullptr, nullptr, "Print this help message and exit."                         },
   { eVersion,           'v',  "version",       nullptr, nullptr, "Print the application version and exit."                   },
   { eNoMiniPBRT,        '\0', "no-minipbrt",   nullptr, nullptr, "Disable minpbrt parsing."                                  },
+  { eNoThreaded,        '\0', "no-threaded",   nullptr, nullptr, "Disable threaded parsing."                                 },
   { eNoPBRTParser,      '\0', "no-pbrtparser", nullptr, nullptr, "Disable pbrt-parser parsing."                              },
   { eNoPrewarm,         '\0', "no-prewarm",    nullptr, nullptr, "Don't pre-warm the disk cache before parsing (useful for very large scenes)." },
   { eCSV,               '\0', "csv",           nullptr, nullptr, "Format output as CSV, for easy import into a spreadsheet." },
@@ -42,24 +45,28 @@ namespace vh {
 
   static bool prewarm_parser(const char* filename);
   static bool parse_with_minipbrt(const char* filename, double& parsingSecsOut);
+  static bool parse_with_minipbrt_threaded(const char* filename, double& parsingSecsOut);
   static bool parse_with_pbrtparser(const char* filename, double& parsingSecsOut);
 
 
   enum ParserID {
     ePBRTParser,
     eMiniPBRT,
+    eThreaded,
   };
 
 
   static const char* kParserNames[] = {
     "pbrt-parser",
     "minipbrt",
+    "threaded",
   };
 
 
   static const ParserFunc kParsers[] = {
     parse_with_pbrtparser,
     parse_with_minipbrt,
+    parse_with_minipbrt_threaded,
   };
   static const uint32_t kNumParsers = sizeof(kParsers) / sizeof(kParsers[0]);
 
@@ -88,7 +95,7 @@ namespace vh {
     buffer[bufLen] = '\0';
 
     const minipbrt::Scene* scene = parser.borrow_scene();
-    for (uint32_t i = 0, endI = scene->shapes.size(); i < endI; i++) {
+    for (uint32_t i = 0, endI = uint32_t(scene->shapes.size()); i < endI; i++) {
       if (scene->shapes[i]->type() == minipbrt::ShapeType::PLYMesh) {
         const minipbrt::PLYMesh* plymesh = dynamic_cast<const minipbrt::PLYMesh*>(scene->shapes[i]);
         FILE* f = nullptr;
@@ -119,6 +126,50 @@ namespace vh {
     timer.stop();
     parsingSecsOut = timer.elapsedSecs();
 
+    return ok;
+  }
+
+
+  static bool parse_with_minipbrt_threaded(const char* filename, double& parsingSecsOut)
+  {
+    Timer timer(true); // true --> autostart the timer.
+
+    minipbrt::Parser parser;
+    minipbrt::Scene* scene = nullptr;
+    bool ok = parser.parse(filename);
+    if (ok) {
+      scene = parser.take_scene();
+      std::vector<uint32_t> plymeshes;
+      plymeshes.reserve(scene->shapes.size());
+      for (size_t i = 0, endI = scene->shapes.size(); i < endI; i++) {
+        if (scene->shapes.at(i)->type() == minipbrt::ShapeType::PLYMesh) {
+          plymeshes.push_back(uint32_t(i));
+        }
+      }
+
+      std::atomic_uint nextMesh(0);
+      const uint32_t endMesh = uint32_t(plymeshes.size());
+      const uint32_t numThreads = std::thread::hardware_concurrency();
+
+      std::vector<std::thread> loaderThreads;
+      loaderThreads.reserve(numThreads);
+      for (uint32_t i = 0; i < numThreads; i++) {
+        loaderThreads.push_back(std::thread([scene, &plymeshes, &nextMesh, endMesh]() {
+          uint32_t mesh = nextMesh++;
+          while (mesh < endMesh) {
+            scene->to_triangle_mesh(plymeshes.at(mesh));
+            mesh = nextMesh++;
+          }
+        }));
+      }
+      for (std::thread& th : loaderThreads) {
+        th.join();
+      }
+    }
+    timer.stop();
+    parsingSecsOut = timer.elapsedSecs();
+
+    delete scene;
     return ok;
   }
 
@@ -162,16 +213,47 @@ namespace vh {
   }
 
 
-  static void print_header(int filenameWidth, const bool enabled[kNumParsers])
+  static uint32_t first_enabled(const bool enabled[kNumParsers])
   {
-    printf("| %-*s ", filenameWidth, "Filename");
     for (uint32_t i = 0; i < kNumParsers; i++) {
       if (enabled[i]) {
-        printf("| %12s ", kParserNames[i]);
+        return i;
       }
     }
-    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
-      printf("| %12s ", "Speedup");
+    return kNumParsers;
+  }
+
+
+  static bool multiple_parsers_enabled(const bool enabled[kNumParsers])
+  {
+    bool foundOne = false;
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (enabled[i]) {
+        if (foundOne) {
+          return true;
+        }
+        foundOne = true;
+      }
+    }
+    return false;
+  }
+
+
+  static void print_header(int filenameWidth, const bool enabled[kNumParsers], uint32_t baseline)
+  {
+    bool showSpeedup = baseline < kNumParsers;
+
+    printf("| %-*s ", filenameWidth, "Filename");
+    for (uint32_t i = 0; i < kNumParsers; i++) {
+      if (!enabled[i]) {
+        continue;
+      }
+      if (showSpeedup && i != baseline) {
+        printf("| %12s (Speedup) ", kParserNames[i]);
+      }
+      else {
+        printf("| %12s ", kParserNames[i]);
+      }
     }
     printf("|\n");
 
@@ -182,42 +264,52 @@ namespace vh {
     fputc(' ', stdout);
 
     for (uint32_t i = 0; i < kNumParsers; i++) {
-      if (enabled[i]) {
+      if (!enabled[i]) {
+        continue;
+      }
+      if (showSpeedup && i != baseline) {
+        printf("| ---------------------: ");
+      }
+      else {
         printf("| -----------: ");
       }
     }
-    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
-      printf("| -----------: ");
-    }
+
     printf("|\n");
 
     fflush(stdout);
   }
 
 
-  static void print_result(const Result& result, int filenameWidth, const bool enabled[kNumParsers])
+  static void print_result(const Result& result, int filenameWidth, const bool enabled[kNumParsers], uint32_t baseline)
   {
+    bool showSpeedup = baseline < kNumParsers;
+
     printf("| %-*s ", filenameWidth, result.filename.c_str());
 
     for (uint32_t i = 0; i < kNumParsers; i++) {
       if (!enabled[i]) {
         continue;
       }
-      if (result.ok[i]) {
-        printf("| %12.3lf ", result.secs[i]);
+      if (showSpeedup && i != baseline) {
+        if (result.ok[i] && result.ok[baseline]) {
+          double speedup = result.secs[baseline] / result.secs[i];
+          printf("| %12.3lf (%6.2lfx) ", result.secs[i], speedup);
+        }
+        else if (result.ok[i] && !result.ok[baseline]) {
+          printf("| %12.3lf           ", result.secs[i]);
+        }
+        else {
+          printf("| %12s           ", "failed");
+        }
       }
       else {
-        printf("| %12s ", "failed");
-      }
-    }
-
-    if (enabled[eMiniPBRT] && enabled[ePBRTParser]) {
-      if (result.ok[eMiniPBRT] && result.ok[ePBRTParser]) {
-        double speedup = result.secs[ePBRTParser] / result.secs[eMiniPBRT];
-        printf("| %11.2lfx ", speedup);
-      }
-      else {
-        printf("| %12c ", '-');
+        if (result.ok[i]) {
+          printf("| %12.3lf ", result.secs[i]);
+        }
+        else {
+          printf("| %12s ", "failed");
+        }
       }
     }
 
@@ -235,9 +327,11 @@ namespace vh {
       }
     }
 
-    print_header(filenameWidth, enabled);
+    uint32_t baseline = multiple_parsers_enabled(enabled) ? first_enabled(enabled) : kNumParsers;
+
+    print_header(filenameWidth, enabled, baseline);
     for (const Result& result : results) {
-      print_result(result, filenameWidth, enabled);
+      print_result(result, filenameWidth, enabled, baseline);
     }
   }
 
@@ -292,7 +386,7 @@ int main(int argc, char** argv)
 {
   using namespace vh;
 
-  bool enabled[kNumParsers] = { true, true };
+  bool enabled[kNumParsers] = { true, true, true };
   bool prewarm = true;
   bool printAsCSV = false;
 
