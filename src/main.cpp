@@ -274,6 +274,17 @@ namespace vh {
     }
   }
 
+
+  static bool has_extension(const char* filename, const char* ext)
+  {
+    int j = int(strlen(ext));
+    int i = int(strlen(filename)) - j;
+    if (i <= 0 || filename[i - 1] != '.') {
+      return false;
+    }
+    return strcmp(filename + i, ext) == 0;
+  }
+
 } // namespace vh
 
 
@@ -337,28 +348,41 @@ int main(int argc, char** argv)
   // Process the files, building up a table of results. We don't just print the
   // results out as we go because pbrt-parser prints some intermediate output
   // which messes up our formatting.
-  std::vector<Result> results;
-  results.reserve(static_cast<size_t>(argc - 1));
-
   const int kFilenameBufferLen = 16 * 1024 - 1;
   char* filenameBuffer = new char[kFilenameBufferLen + 1];
   filenameBuffer[kFilenameBufferLen] = '\0';
 
+  std::vector<std::string> filenames;
   for (int i = 1; i < argc; i++) {
-    if (argv[i][0] == '@') {
+    if (has_extension(argv[i], "txt")) {
+      printf("file %s has extension 'txt'\n", argv[i]);
       FILE* f = nullptr;
-      if (fopen_s(&f, argv[i] + 1, "r") == 0) {
+      if (fopen_s(&f, argv[i], "r") == 0) {
         while (fgets(filenameBuffer, kFilenameBufferLen, f)) {
-          results.push_back(Result{});
-          parse(filenameBuffer, enabled, prewarm, results.back());
+          filenames.push_back(filenameBuffer);
+          while (filenames.back().back() == '\n') {
+            filenames.back().pop_back();
+          }
         }
         fclose(f);
       }
+      else {
+        fprintf(stderr, "Failed to open %s\n", argv[i]);
+      }
     }
     else {
-      results.push_back(Result{});
-      parse(argv[i], enabled, prewarm, results.back());
+      filenames.push_back(argv[i]);
     }
+  }
+
+  printf("Parsing these files:\n");
+  for (const std::string& filename : filenames) {
+    printf("  %s\n", filename.c_str());
+  }
+
+  std::vector<Result> results(filenames.size(), Result{});
+  for (size_t i = 0; i < filenames.size(); i++) {
+    parse(filenames[i].c_str(), enabled, prewarm, results[i]);
   }
   printf("Parsing complete!\n\n");
 
