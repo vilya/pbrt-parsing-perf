@@ -76,9 +76,9 @@ Source: https://www.technology.disneyanimation.com/islandscene
   very little impact on the overall times.
 - pbrt-parser ran first, minipbrt ran second.  
 
-| Filename                                         |  pbrt-parser |     minipbrt |      Speedup |
-| :----------------------------------------------- | -----------: | -----------: | -----------: |
-| island/pbrt/island.pbrt                          |     5387.676 |      183.550 |       29.35x |
+| Filename         |  pbrt-parser |     minipbrt |      Speedup |
+| :--------------- | -----------: | -----------: | -----------: |
+| pbrt/island.pbrt |     5346.921 |      168.613 |       31.71x |
 
 
 
