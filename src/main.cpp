@@ -29,9 +29,9 @@ enum CmdLineOption {
 static const vh::CommandLineOption options[] = {
   { eHelp,              'h',  "help",          nullptr, nullptr, "Print this help message and exit."                         },
   { eVersion,           'v',  "version",       nullptr, nullptr, "Print the application version and exit."                   },
-  { eNoMiniPBRT,        '\0', "no-minipbrt",   nullptr, nullptr, "Disable minpbrt parsing."                                  },
-  { eNoThreaded,        '\0', "no-threaded",   nullptr, nullptr, "Disable threaded parsing."                                 },
-  { eNoPBRTParser,      '\0', "no-pbrtparser", nullptr, nullptr, "Disable pbrt-parser parsing."                              },
+  { eNoMiniPBRT,        '\0', "no-minipbrt",   nullptr, nullptr, "Disable the \"minpbrt\" parser."                           },
+  { eNoThreaded,        '\0', "no-threaded",   nullptr, nullptr, "Disable the \"threaded\" parser (minipbrt, with multithreaded PLY mesh loading)." },
+  { eNoPBRTParser,      '\0', "no-pbrtparser", nullptr, nullptr, "Disable the \"pbrt-parser\" parser."                       },
   { eNoPrewarm,         '\0', "no-prewarm",    nullptr, nullptr, "Don't pre-warm the disk cache before parsing (useful for very large scenes)." },
   { eCSV,               '\0', "csv",           nullptr, nullptr, "Format output as CSV, for easy import into a spreadsheet." },
   { vh::kUnknownOption, '\0', nullptr,         nullptr, nullptr, nullptr                                                     }
