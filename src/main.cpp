@@ -121,8 +121,11 @@ namespace vh {
     minipbrt::Parser parser;
     bool ok = parser.parse(filename);
     if (ok) {
-      ok = parser.borrow_scene()->load_all_ply_meshes();
+      minipbrt::Scene* scene = parser.take_scene();
+      ok = scene->load_all_ply_meshes();
+      delete scene;
     }
+
     timer.stop();
     parsingSecsOut = timer.elapsedSecs();
 
@@ -135,10 +138,10 @@ namespace vh {
     Timer timer(true); // true --> autostart the timer.
 
     minipbrt::Parser parser;
-    minipbrt::Scene* scene = nullptr;
     bool ok = parser.parse(filename);
     if (ok) {
-      scene = parser.take_scene();
+      minipbrt::Scene* scene = parser.take_scene();
+
       std::vector<uint32_t> plymeshes;
       plymeshes.reserve(scene->shapes.size());
       for (size_t i = 0, endI = scene->shapes.size(); i < endI; i++) {
@@ -153,6 +156,7 @@ namespace vh {
 
       std::vector<std::thread> loaderThreads;
       loaderThreads.reserve(numThreads);
+
       for (uint32_t i = 0; i < numThreads; i++) {
         loaderThreads.push_back(std::thread([scene, &plymeshes, &nextMesh, endMesh]() {
           uint32_t mesh = nextMesh++;
@@ -162,14 +166,17 @@ namespace vh {
           }
         }));
       }
+
       for (std::thread& th : loaderThreads) {
         th.join();
       }
+
+      delete scene;
     }
+
     timer.stop();
     parsingSecsOut = timer.elapsedSecs();
 
-    delete scene;
     return ok;
   }
 
@@ -180,8 +187,7 @@ namespace vh {
 
     bool ok = true;
     try {
-      pbrt::Scene::SP pbrtScene;
-      pbrtScene = pbrt::importPBRT(filename);
+      pbrt::Scene::SP pbrtScene = pbrt::importPBRT(filename);
       ok = pbrtScene != nullptr;
     }
     catch (const std::exception& e) {
