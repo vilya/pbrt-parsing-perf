@@ -245,7 +245,8 @@ Results for all scenes in Benedikt Bitterli's collection
 - Source: https://benedikt-bitterli.me/resources/
 - The disk cache was prewarmed by running minipbrt and reading (but not
   parsing) any .ply files
-- pbrt-parser runs first after the prewarming step, minipbrt runs second, threaded runs last.
+- pbrt-parser ran first after the prewarming step, minipbrt ran second,
+  threaded ran third.
 
 
 | Filename                        |  pbrt-parser |     minipbrt (Speedup) |     threaded (Speedup) |
@@ -291,11 +292,9 @@ Source: https://www.technology.disneyanimation.com/islandscene
 - The disk cache was not prewarmed for these comparisons. The data set is so
   large that whether the data was previously present in the disk cache has 
   very little impact on the overall times.
-- pbrt-parser ran first, minipbrt ran second.
-- The scene does not use any PLY files so the threaded parser should be
-  roughly the same speed as minipbrt. I did not bother to run it.
+- pbrt-parser ran first after the prewarming step, minipbrt ran second,
+  threaded ran third.
 
-
-| Filename         |  pbrt-parser |     minipbrt |      Speedup |
-| :--------------- | -----------: | -----------: | -----------: |
-| pbrt/island.pbrt |     5346.921 |      168.613 |       31.71x |
+| Filename         |  pbrt-parser |     minipbrt (Speedup) |     threaded (Speedup) |
+| :--------------- | -----------: | ---------------------: | ---------------------: |
+| pbrt/island.pbrt |     5021.197 |      199.794 ( 25.13x) |      201.739 ( 24.89x) |
