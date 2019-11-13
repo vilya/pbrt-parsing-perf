@@ -12,10 +12,8 @@ Differences between minipbrt and pbrt-parser
 In the interests of making the comparison as fair as possible, we're loading
 all PLY files using the helper methods that minipbrt provides.
 
-At time of writing, *minipbrt* and *pbrt-parser* support different subsets of
-the PBRTv3 file format. *minipbrt* supports the entire format with the
-exception of per-shape material overrides. *pbrt-parser* only supports a
-commonly used subset of the format. Here's a summary:
+At time of writing, *minipbrt* supports the entire PBRT v3 file format while
+*pbrt-parser* supports a common subset of it:
 
 |                    | minipbrt | pbrt-parser                                                          | 
 | :----------------- | :------: | :------------------------------------------------------------------: |
@@ -79,164 +77,166 @@ Results for all scenes in pbrt-v3-scenes
   parsing) any .ply files
 - pbrt-parser runs first after the prewarming step, minipbrt runs second,
   threded runs third.
+- Results generated using a release build of pbrt-parsing-perf from commit
+  8e6750c4fb5ec2d02964c96d34e6bcfb77d89338.
 
 | Filename                                         |  pbrt-parser |     minipbrt (Speedup) |     threaded (Speedup) |
 | :----------------------------------------------- | -----------: | ---------------------: | ---------------------: |
-| barcelona-pavilion/pavilion-day.pbrt             |        5.475 |        0.913 (  5.99x) |        0.313 ( 17.48x) |
-| barcelona-pavilion/pavilion-night.pbrt           |        5.113 |        0.885 (  5.78x) |        0.310 ( 16.49x) |
-| bathroom/bathroom.pbrt                           |        0.314 |        0.059 (  5.36x) |        0.021 ( 15.31x) |
-| bmw-m6/bmw-m6.pbrt                               |        0.583 |        0.101 (  5.79x) |        0.034 ( 17.11x) |
-| breakfast/breakfast.pbrt                         |       failed |        0.042           |        0.016           |
-| breakfast/breakfast-lamps.pbrt                   |        0.348 |        0.034 ( 10.35x) |        0.015 ( 23.45x) |
-| breakfast/f16-8a.pbrt                            |        0.347 |        0.039 (  8.82x) |        0.014 ( 24.06x) |
-| breakfast/f16-8b.pbrt                            |        0.344 |        0.041 (  8.46x) |        0.012 ( 29.72x) |
-| buddha-fractal/buddha-fractal.pbrt               |        0.629 |        0.027 ( 23.36x) |        0.030 ( 20.78x) |
-| bunny-fur/f3-15.pbrt                             |       56.029 |        2.362 ( 23.72x) |        2.412 ( 23.23x) |
-| caustic-glass/f16-11a.pbrt                       |       failed |        0.016           |        0.017           |
-| caustic-glass/f16-11b.pbrt                       |       failed |        0.018           |        0.020           |
-| caustic-glass/f16-9a.pbrt                        |       failed |        0.017           |        0.021           |
-| caustic-glass/f16-9b.pbrt                        |       failed |        0.022           |        0.021           |
-| caustic-glass/f16-9c.pbrt                        |       failed |        0.017           |        0.020           |
-| caustic-glass/glass.pbrt                         |       failed |        0.019           |        0.022           |
-| chopper-titan/chopper-titan.pbrt                 |        3.895 |        0.826 (  4.72x) |        0.554 (  7.03x) |
-| cloud/cloud.pbrt                                 |        0.334 |        0.013 ( 26.69x) |        0.015 ( 22.69x) |
-| cloud/f15-4a.pbrt                                |        0.337 |        0.012 ( 28.04x) |        0.017 ( 19.87x) |
-| cloud/f15-4b.pbrt                                |        0.330 |        0.013 ( 26.36x) |        0.014 ( 23.08x) |
-| cloud/f15-4c.pbrt                                |        0.326 |        0.014 ( 23.47x) |        0.016 ( 20.05x) |
-| cloud/smoke.pbrt                                 |        0.338 |        0.012 ( 28.10x) |        0.014 ( 23.32x) |
-| coffee-splash/f15-5.pbrt                         |        0.277 |        0.040 (  6.84x) |        0.044 (  6.32x) |
-| coffee-splash/splash.pbrt                        |        0.281 |        0.039 (  7.21x) |        0.044 (  6.35x) |
-| contemporary-bathroom/contemporary-bathroom.pbrt |        0.592 |        0.244 (  2.42x) |        0.190 (  3.11x) |
-| crown/crown.pbrt                                 |        3.061 |        0.681 (  4.50x) |        0.512 (  5.98x) |
-| dambreak/dambreak0.pbrt                          |        1.040 |        0.153 (  6.79x) |        0.151 (  6.89x) |
-| dambreak/dambreak1.pbrt                          |        1.741 |        0.249 (  6.99x) |        0.242 (  7.19x) |
-| dragon/f11-13.pbrt                               |        3.668 |        0.904 (  4.06x) |        0.504 (  7.28x) |
-| dragon/f11-14.pbrt                               |        3.801 |        0.895 (  4.25x) |        0.495 (  7.67x) |
-| dragon/f14-3.pbrt                                |        1.831 |        0.448 (  4.09x) |        0.457 (  4.01x) |
-| dragon/f14-5.pbrt                                |        3.823 |        0.899 (  4.25x) |        0.511 (  7.49x) |
-| dragon/f15-13.pbrt                               |        3.677 |        0.906 (  4.06x) |        0.504 (  7.30x) |
-| dragon/f8-10.pbrt                                |        1.841 |        0.472 (  3.90x) |        0.450 (  4.09x) |
-| dragon/f8-14a.pbrt                               |        1.868 |        0.453 (  4.13x) |        0.470 (  3.98x) |
-| dragon/f8-14b.pbrt                               |        1.867 |        0.452 (  4.13x) |        0.457 (  4.08x) |
-| dragon/f8-21a.pbrt                               |        1.857 |        0.464 (  4.00x) |        0.455 (  4.08x) |
-| dragon/f8-21b.pbrt                               |        1.874 |        0.459 (  4.08x) |        0.467 (  4.01x) |
-| dragon/f8-24.pbrt                                |        3.680 |        0.898 (  4.10x) |        0.496 (  7.42x) |
-| dragon/f8-4a.pbrt                                |        1.839 |        0.454 (  4.05x) |        0.449 (  4.09x) |
-| dragon/f8-4b.pbrt                                |        1.834 |        0.446 (  4.11x) |        0.458 (  4.01x) |
-| dragon/f9-3.pbrt                                 |        1.836 |        0.456 (  4.03x) |        0.461 (  3.99x) |
-| dragon/f9-4.pbrt                                 |        1.819 |        0.454 (  4.00x) |        0.449 (  4.05x) |
-| ecosys/ecosys.pbrt                               |        1.782 |        0.322 (  5.54x) |        0.205 (  8.70x) |
-| figures/f10-1ac.pbrt                             |        0.000 |        0.000 (  0.92x) |        0.004 (  0.10x) |
-| figures/f10-1b.pbrt                              |        0.000 |        0.000 (  0.90x) |        0.003 (  0.10x) |
-| figures/f11-15.pbrt                              |        0.000 |        0.000 (  1.18x) |        0.003 (  0.13x) |
-| figures/f3-18.pbrt                               |       failed |        0.000           |        0.003           |
-| figures/f7-19a.pbrt                              |        0.000 |        0.000 (  0.67x) |        0.002 (  0.09x) |
-| figures/f7-19b.pbrt                              |        0.000 |        0.000 (  0.64x) |        0.002 (  0.10x) |
-| figures/f7-19c.pbrt                              |        0.000 |        0.000 (  0.65x) |        0.002 (  0.11x) |
-| figures/f7-30a.pbrt                              |        0.000 |        0.000 (  0.70x) |        0.002 (  0.12x) |
-| figures/f7-30b.pbrt                              |        0.000 |        0.000 (  0.66x) |        0.003 (  0.11x) |
-| figures/f7-30c.pbrt                              |        0.000 |        0.000 (  0.70x) |        0.003 (  0.11x) |
-| figures/f7-34a.pbrt                              |        0.000 |        0.001 (  0.69x) |        0.004 (  0.10x) |
-| figures/f7-34b.pbrt                              |        0.000 |        0.000 (  0.68x) |        0.002 (  0.11x) |
-| figures/f7-34c.pbrt                              |        0.000 |        0.000 (  0.74x) |        0.002 (  0.13x) |
-| figures/f8-22.pbrt                               |        0.001 |        0.001 (  1.71x) |        0.002 (  0.53x) |
-| ganesha/f3-11.pbrt                               |        5.077 |        0.690 (  7.36x) |        0.679 (  7.48x) |
-| ganesha/ganesha.pbrt                             |        5.027 |        0.691 (  7.27x) |        0.687 (  7.32x) |
-| hair/curly-hair.pbrt                             |      158.725 |        9.456 ( 16.79x) |       11.989 ( 13.24x) |
-| hair/sphere-hairblock.pbrt                       |        0.425 |        0.018 ( 23.01x) |        0.024 ( 17.73x) |
-| hair/straight-hair.pbrt                          |       84.669 |        3.803 ( 22.26x) |        4.536 ( 18.67x) |
-| head/f9-5.pbrt                                   |        0.067 |        0.025 (  2.68x) |        0.024 (  2.81x) |
-| head/head.pbrt                                   |        0.079 |        0.024 (  3.30x) |        0.024 (  3.29x) |
-| killeroos/killeroo-gold.pbrt                     |        0.046 |        0.011 (  4.02x) |        0.013 (  3.49x) |
-| killeroos/killeroo-moving.pbrt                   |        0.101 |        0.013 (  7.68x) |        0.021 (  4.80x) |
-| killeroos/killeroo-simple.pbrt                   |        0.103 |        0.014 (  7.33x) |        0.016 (  6.43x) |
-| landscape/f4-1.pbrt                              |       73.330 |       10.560 (  6.94x) |        7.520 (  9.75x) |
-| landscape/f6-13.pbrt                             |       73.746 |       10.635 (  6.93x) |        7.724 (  9.55x) |
-| landscape/f6-14.pbrt                             |       74.195 |       10.363 (  7.16x) |        7.579 (  9.79x) |
-| landscape/view-0.pbrt                            |       71.660 |       10.391 (  6.90x) |        7.314 (  9.80x) |
-| landscape/view-1.pbrt                            |       71.158 |       10.216 (  6.97x) |        7.258 (  9.80x) |
-| landscape/view-2.pbrt                            |       70.674 |       10.182 (  6.94x) |        7.227 (  9.78x) |
-| landscape/view-3.pbrt                            |       69.970 |       10.029 (  6.98x) |        7.117 (  9.83x) |
-| landscape/view-4.pbrt                            |       68.524 |       10.082 (  6.80x) |        7.077 (  9.68x) |
-| lte-orb/lte-orb-roughglass.pbrt                  |        1.274 |        0.062 ( 20.68x) |        0.060 ( 21.30x) |
-| lte-orb/lte-orb-silver.pbrt                      |        1.277 |        0.058 ( 21.92x) |        0.068 ( 18.90x) |
-| measure-one/frame120.pbrt                        |       22.201 |       11.599 (  1.91x) |       12.557 (  1.77x) |
-| measure-one/frame180.pbrt                        |       21.247 |       11.689 (  1.82x) |       12.721 (  1.67x) |
-| measure-one/frame210.pbrt                        |       21.433 |       11.763 (  1.82x) |       12.508 (  1.71x) |
-| measure-one/frame25.pbrt                         |       21.079 |       11.778 (  1.79x) |       12.374 (  1.70x) |
-| measure-one/frame300.pbrt                        |       21.215 |       11.761 (  1.80x) |       12.375 (  1.71x) |
-| measure-one/frame35.pbrt                         |       20.936 |       11.607 (  1.80x) |       12.467 (  1.68x) |
-| measure-one/frame380.pbrt                        |       20.919 |       11.815 (  1.77x) |       12.388 (  1.69x) |
-| measure-one/frame52.pbrt                         |       20.898 |       11.829 (  1.77x) |       12.479 (  1.67x) |
-| measure-one/frame85.pbrt                         |       20.835 |       11.814 (  1.76x) |       12.528 (  1.66x) |
-| pbrt-book/book.pbrt                              |        0.105 |        0.025 (  4.21x) |        0.028 (  3.71x) |
-| sanmiguel/f10-8.pbrt                             |       26.749 |        4.634 (  5.77x) |        4.469 (  5.99x) |
-| sanmiguel/f16-21a.pbrt                           |       27.389 |        4.543 (  6.03x) |        4.466 (  6.13x) |
-| sanmiguel/f16-21b.pbrt                           |       26.220 |        4.924 (  5.33x) |        4.707 (  5.57x) |
-| sanmiguel/f16-21c.pbrt                           |       35.588 |        4.501 (  7.91x) |        4.446 (  8.00x) |
-| sanmiguel/f6-17.pbrt                             |       31.176 |        5.332 (  5.85x) |        4.784 (  6.52x) |
-| sanmiguel/f6-25.pbrt                             |       26.221 |        4.499 (  5.83x) |        4.460 (  5.88x) |
-| sanmiguel/sanmiguel.pbrt                         |       26.156 |        4.476 (  5.84x) |        4.459 (  5.87x) |
-| sanmiguel/sanmiguel_cam1.pbrt                    |       26.214 |        4.477 (  5.86x) |        4.430 (  5.92x) |
-| sanmiguel/sanmiguel_cam14.pbrt                   |       20.409 |        4.384 (  4.66x) |        4.271 (  4.78x) |
-| sanmiguel/sanmiguel_cam15.pbrt                   |       18.194 |        4.241 (  4.29x) |        4.203 (  4.33x) |
-| sanmiguel/sanmiguel_cam18.pbrt                   |       26.264 |        4.469 (  5.88x) |        4.411 (  5.95x) |
-| sanmiguel/sanmiguel_cam20.pbrt                   |       26.214 |        4.479 (  5.85x) |        4.424 (  5.93x) |
-| sanmiguel/sanmiguel_cam25.pbrt                   |       26.482 |        4.537 (  5.84x) |        4.417 (  6.00x) |
-| sanmiguel/sanmiguel_cam3.pbrt                    |       26.542 |        4.504 (  5.89x) |        4.439 (  5.98x) |
-| sanmiguel/sanmiguel_cam4.pbrt                    |       26.448 |        4.519 (  5.85x) |        4.484 (  5.90x) |
-| simple/anim-bluespheres.pbrt                     |        0.001 |        0.001 (  0.94x) |        0.003 (  0.21x) |
-| simple/buddha.pbrt                               |        1.742 |        0.188 (  9.28x) |        0.179 (  9.71x) |
-| simple/bump-sphere.pbrt                          |        0.001 |        0.001 (  0.73x) |        0.003 (  0.19x) |
-| simple/caustic-proj.pbrt                         |        0.000 |        0.001 (  0.42x) |        0.003 (  0.10x) |
-| simple/dof-dragons.pbrt                          |       13.453 |        0.336 ( 39.99x) |        0.211 ( 63.80x) |
-| simple/miscquads.pbrt                            |        0.001 |        0.001 (  0.78x) |        0.003 (  0.23x) |
-| simple/room-mlt.pbrt                             |       failed |        0.015           |        0.020           |
-| simple/room-path.pbrt                            |       failed |        0.015           |        0.017           |
-| simple/room-sppm.pbrt                            |       failed |        0.014           |        0.017           |
-| simple/spheres-differentials-texfilt.pbrt        |        0.000 |        0.001 (  0.55x) |        0.004 (  0.12x) |
-| simple/spotfog.pbrt                              |       failed |        0.001           |        0.003           |
-| simple/teapot-area-light.pbrt                    |       failed |        0.005           |        0.007           |
-| simple/teapot-metal.pbrt                         |        0.104 |        0.006 ( 16.30x) |        0.007 ( 15.07x) |
-| smoke-plume/plume-084.pbrt                       |        7.369 |        0.263 ( 28.06x) |        0.269 ( 27.40x) |
-| smoke-plume/plume-184.pbrt                       |        8.787 |        0.300 ( 29.31x) |        0.309 ( 28.47x) |
-| smoke-plume/plume-284.pbrt                       |        8.873 |        0.318 ( 27.91x) |        0.316 ( 28.11x) |
-| sportscar/f12-19a.pbrt                           |        9.582 |        1.691 (  5.67x) |        1.288 (  7.44x) |
-| sportscar/f12-19b.pbrt                           |        9.708 |        1.854 (  5.23x) |        1.287 (  7.54x) |
-| sportscar/f12-20a.pbrt                           |        9.689 |        1.714 (  5.65x) |        1.288 (  7.52x) |
-| sportscar/f12-20b.pbrt                           |        9.704 |        1.721 (  5.64x) |        1.297 (  7.48x) |
-| sportscar/f7-37a.pbrt                            |        9.571 |        1.719 (  5.57x) |        1.296 (  7.39x) |
-| sportscar/f7-37b.pbrt                            |        9.598 |        1.720 (  5.58x) |        1.306 (  7.35x) |
-| sportscar/sportscar.pbrt                         |        9.565 |        1.715 (  5.58x) |        1.280 (  7.47x) |
-| sssdragon/dragon_10.pbrt                         |       failed |        1.058           |        1.068           |
-| sssdragon/dragon_250.pbrt                        |       failed |        1.124           |        1.084           |
-| sssdragon/dragon_50.pbrt                         |       failed |        1.065           |        1.064           |
-| sssdragon/f15-7.pbrt                             |       failed |        1.066           |        1.064           |
-| structuresynth/arcsphere.pbrt                    |        0.293 |        0.014 ( 20.67x) |        0.020 ( 14.68x) |
-| structuresynth/ballpile.pbrt                     |        0.072 |        0.006 ( 12.28x) |        0.008 (  8.99x) |
-| structuresynth/metal.pbrt                        |        0.146 |        0.008 ( 18.76x) |        0.009 ( 15.49x) |
-| structuresynth/microcity.pbrt                    |        0.569 |        0.030 ( 18.79x) |        0.034 ( 16.74x) |
-| transparent-machines/frame1266.pbrt              |        8.148 |        3.786 (  2.15x) |        3.871 (  2.10x) |
-| transparent-machines/frame542.pbrt               |        3.200 |        1.419 (  2.26x) |        1.470 (  2.18x) |
-| transparent-machines/frame675.pbrt               |        3.950 |        1.845 (  2.14x) |        1.918 (  2.06x) |
-| transparent-machines/frame812.pbrt               |        5.191 |        2.461 (  2.11x) |        2.533 (  2.05x) |
-| transparent-machines/frame888.pbrt               |        6.027 |        2.858 (  2.11x) |        2.969 (  2.03x) |
-| tt/tt.pbrt                                       |        1.684 |        0.783 (  2.15x) |        0.794 (  2.12x) |
-| veach-bidir/bidir.pbrt                           |        0.009 |        0.014 (  0.65x) |        0.016 (  0.57x) |
-| veach-mis/mis.pbrt                               |        0.001 |        0.007 (  0.20x) |        0.009 (  0.15x) |
-| villa/f16-20a.pbrt                               |        5.639 |        2.054 (  2.75x) |        1.994 (  2.83x) |
-| villa/f16-20b.pbrt                               |        5.595 |        2.060 (  2.72x) |        1.987 (  2.82x) |
-| villa/f16-20c.pbrt                               |        5.587 |        2.047 (  2.73x) |        1.971 (  2.83x) |
-| villa/villa-daylight.pbrt                        |        5.579 |        2.082 (  2.68x) |        1.972 (  2.83x) |
-| villa/villa-lights-on.pbrt                       |       failed |        2.029           |        1.968           |
-| villa/villa-photons.pbrt                         |       failed |        2.042           |        1.994           |
-| volume-caustic/caustic.pbrt                      |       failed |        0.001           |        0.003           |
-| volume-caustic/f16-22a.pbrt                      |       failed |        0.001           |        0.003           |
-| volume-caustic/f16-22b.pbrt                      |       failed |        0.001           |        0.004           |
-| vw-van/vw-van.pbrt                               |        3.459 |        0.989 (  3.50x) |        0.967 (  3.58x) |
-| white-room/whiteroom-daytime.pbrt                |        1.433 |        0.707 (  2.03x) |        0.752 (  1.91x) |
-| white-room/whiteroom-night.pbrt                  |        1.452 |        0.721 (  2.01x) |        0.752 (  1.93x) |
-| yeahright/yeahright.pbrt                         |        0.172 |        0.054 (  3.20x) |        0.062 (  2.76x) |
+| barcelona-pavilion/pavilion-day.pbrt             |        5.054 |        0.576 (  8.77x) |        0.227 ( 22.30x) |
+| barcelona-pavilion/pavilion-night.pbrt           |        5.045 |        0.553 (  9.11x) |        0.225 ( 22.43x) |
+| bathroom/bathroom.pbrt                           |        0.301 |        0.025 ( 11.93x) |        0.012 ( 25.20x) |
+| bmw-m6/bmw-m6.pbrt                               |        0.566 |        0.052 ( 10.97x) |        0.025 ( 22.91x) |
+| breakfast/breakfast.pbrt                         |       failed |        0.025           |        0.008           |
+| breakfast/breakfast-lamps.pbrt                   |        0.334 |        0.021 ( 16.12x) |        0.007 ( 49.98x) |
+| breakfast/f16-8a.pbrt                            |        0.343 |        0.021 ( 16.47x) |        0.007 ( 51.23x) |
+| breakfast/f16-8b.pbrt                            |        0.329 |        0.022 ( 15.20x) |        0.007 ( 48.49x) |
+| buddha-fractal/buddha-fractal.pbrt               |        0.622 |        0.027 ( 23.38x) |        0.029 ( 21.30x) |
+| bunny-fur/f3-15.pbrt                             |       53.863 |        2.394 ( 22.50x) |        2.402 ( 22.43x) |
+| caustic-glass/f16-11a.pbrt                       |       failed |        0.010           |        0.011           |
+| caustic-glass/f16-11b.pbrt                       |       failed |        0.010           |        0.013           |
+| caustic-glass/f16-9a.pbrt                        |       failed |        0.014           |        0.013           |
+| caustic-glass/f16-9b.pbrt                        |       failed |        0.012           |        0.014           |
+| caustic-glass/f16-9c.pbrt                        |       failed |        0.014           |        0.013           |
+| caustic-glass/glass.pbrt                         |       failed |        0.014           |        0.012           |
+| chopper-titan/chopper-titan.pbrt                 |        3.806 |        0.502 (  7.58x) |        0.484 (  7.86x) |
+| cloud/cloud.pbrt                                 |        0.326 |        0.012 ( 27.42x) |        0.012 ( 26.42x) |
+| cloud/f15-4a.pbrt                                |        0.316 |        0.012 ( 27.17x) |        0.013 ( 24.57x) |
+| cloud/f15-4b.pbrt                                |        0.535 |        0.012 ( 45.55x) |        0.013 ( 39.62x) |
+| cloud/f15-4c.pbrt                                |        0.323 |        0.012 ( 27.77x) |        0.013 ( 24.62x) |
+| cloud/smoke.pbrt                                 |        0.321 |        0.012 ( 27.27x) |        0.013 ( 24.21x) |
+| coffee-splash/f15-5.pbrt                         |        0.267 |        0.027 (  9.96x) |        0.031 (  8.53x) |
+| coffee-splash/splash.pbrt                        |        0.267 |        0.027 (  9.98x) |        0.032 (  8.34x) |
+| contemporary-bathroom/contemporary-bathroom.pbrt |        0.580 |        0.163 (  3.56x) |        0.178 (  3.27x) |
+| crown/crown.pbrt                                 |        2.994 |        0.408 (  7.34x) |        0.460 (  6.51x) |
+| dambreak/dambreak0.pbrt                          |        1.022 |        0.113 (  9.02x) |        0.114 (  8.99x) |
+| dambreak/dambreak1.pbrt                          |        1.695 |        0.179 (  9.47x) |        0.180 (  9.40x) |
+| dragon/f11-13.pbrt                               |        3.543 |        0.338 ( 10.49x) |        0.206 ( 17.20x) |
+| dragon/f11-14.pbrt                               |        3.540 |        0.345 ( 10.25x) |        0.203 ( 17.40x) |
+| dragon/f14-3.pbrt                                |        1.796 |        0.172 ( 10.47x) |        0.172 ( 10.45x) |
+| dragon/f14-5.pbrt                                |        7.773 |        0.342 ( 22.71x) |        0.204 ( 38.04x) |
+| dragon/f15-13.pbrt                               |        3.682 |        0.341 ( 10.79x) |        0.211 ( 17.47x) |
+| dragon/f8-10.pbrt                                |        1.811 |        0.173 ( 10.44x) |        0.175 ( 10.36x) |
+| dragon/f8-14a.pbrt                               |        1.829 |        0.175 ( 10.46x) |        0.174 ( 10.52x) |
+| dragon/f8-14b.pbrt                               |        1.769 |        0.172 ( 10.26x) |        0.172 ( 10.26x) |
+| dragon/f8-21a.pbrt                               |        1.831 |        0.172 ( 10.67x) |        0.177 ( 10.32x) |
+| dragon/f8-21b.pbrt                               |        1.770 |        0.172 ( 10.27x) |        0.173 ( 10.23x) |
+| dragon/f8-24.pbrt                                |        3.651 |        0.344 ( 10.62x) |        0.209 ( 17.47x) |
+| dragon/f8-4a.pbrt                                |        1.775 |        0.174 ( 10.19x) |        0.174 ( 10.22x) |
+| dragon/f8-4b.pbrt                                |        1.766 |        0.175 ( 10.10x) |        0.173 ( 10.18x) |
+| dragon/f9-3.pbrt                                 |        1.894 |        0.174 ( 10.89x) |        0.173 ( 10.94x) |
+| dragon/f9-4.pbrt                                 |        1.775 |        0.176 ( 10.07x) |        0.176 ( 10.09x) |
+| ecosys/ecosys.pbrt                               |        1.748 |        0.242 (  7.22x) |        0.198 (  8.83x) |
+| figures/f10-1ac.pbrt                             |        0.000 |        0.000 (  0.96x) |        0.002 (  0.17x) |
+| figures/f10-1b.pbrt                              |        0.000 |        0.000 (  1.01x) |        0.002 (  0.18x) |
+| figures/f11-15.pbrt                              |        0.000 |        0.000 (  1.25x) |        0.002 (  0.25x) |
+| figures/f3-18.pbrt                               |       failed |        0.000           |        0.002           |
+| figures/f7-19a.pbrt                              |        0.000 |        0.000 (  0.68x) |        0.002 (  0.14x) |
+| figures/f7-19b.pbrt                              |        0.000 |        0.000 (  0.64x) |        0.002 (  0.12x) |
+| figures/f7-19c.pbrt                              |        0.000 |        0.000 (  0.67x) |        0.002 (  0.13x) |
+| figures/f7-30a.pbrt                              |        0.000 |        0.000 (  0.64x) |        0.001 (  0.19x) |
+| figures/f7-30b.pbrt                              |        0.000 |        0.000 (  0.70x) |        0.002 (  0.16x) |
+| figures/f7-30c.pbrt                              |        0.000 |        0.000 (  0.69x) |        0.001 (  0.20x) |
+| figures/f7-34a.pbrt                              |        0.000 |        0.001 (  0.52x) |        0.002 (  0.14x) |
+| figures/f7-34b.pbrt                              |        0.000 |        0.000 (  0.66x) |        0.002 (  0.14x) |
+| figures/f7-34c.pbrt                              |        0.000 |        0.000 (  0.57x) |        0.001 (  0.13x) |
+| figures/f8-22.pbrt                               |        0.001 |        0.001 (  1.87x) |        0.002 (  0.60x) |
+| ganesha/f3-11.pbrt                               |        4.971 |        0.410 ( 12.13x) |        0.406 ( 12.25x) |
+| ganesha/ganesha.pbrt                             |        7.702 |        0.408 ( 18.89x) |        0.407 ( 18.95x) |
+| hair/curly-hair.pbrt                             |      155.517 |        9.572 ( 16.25x) |       11.993 ( 12.97x) |
+| hair/sphere-hairblock.pbrt                       |        0.422 |        0.019 ( 21.91x) |        0.023 ( 18.53x) |
+| hair/straight-hair.pbrt                          |       66.121 |        3.974 ( 16.64x) |        4.479 ( 14.76x) |
+| head/f9-5.pbrt                                   |        0.072 |        0.025 (  2.89x) |        0.027 (  2.62x) |
+| head/head.pbrt                                   |        0.074 |        0.026 (  2.88x) |        0.023 (  3.25x) |
+| killeroos/killeroo-gold.pbrt                     |        0.070 |        0.009 (  8.07x) |        0.013 (  5.47x) |
+| killeroos/killeroo-moving.pbrt                   |        0.094 |        0.011 (  8.38x) |        0.013 (  7.20x) |
+| killeroos/killeroo-simple.pbrt                   |        0.092 |        0.012 (  7.47x) |        0.016 (  5.86x) |
+| landscape/f4-1.pbrt                              |       72.900 |        8.605 (  8.47x) |        7.232 ( 10.08x) |
+| landscape/f6-13.pbrt                             |       71.291 |        8.381 (  8.51x) |        7.201 (  9.90x) |
+| landscape/f6-14.pbrt                             |       70.078 |        8.261 (  8.48x) |        6.971 ( 10.05x) |
+| landscape/view-0.pbrt                            |       69.400 |        8.333 (  8.33x) |        6.930 ( 10.02x) |
+| landscape/view-1.pbrt                            |       68.819 |        8.239 (  8.35x) |        6.908 (  9.96x) |
+| landscape/view-2.pbrt                            |       68.414 |        8.275 (  8.27x) |        6.889 (  9.93x) |
+| landscape/view-3.pbrt                            |       67.845 |        8.227 (  8.25x) |        6.867 (  9.88x) |
+| landscape/view-4.pbrt                            |       67.749 |        8.231 (  8.23x) |        6.844 (  9.90x) |
+| lte-orb/lte-orb-roughglass.pbrt                  |        1.254 |        0.059 ( 21.10x) |        0.062 ( 20.22x) |
+| lte-orb/lte-orb-silver.pbrt                      |        1.257 |        0.052 ( 23.98x) |        0.063 ( 20.08x) |
+| measure-one/frame120.pbrt                        |       21.605 |       10.616 (  2.04x) |       12.461 (  1.73x) |
+| measure-one/frame180.pbrt                        |       20.791 |       11.049 (  1.88x) |       12.165 (  1.71x) |
+| measure-one/frame210.pbrt                        |       20.675 |       10.860 (  1.90x) |       12.071 (  1.71x) |
+| measure-one/frame25.pbrt                         |       21.890 |       11.027 (  1.99x) |       12.130 (  1.80x) |
+| measure-one/frame300.pbrt                        |       20.881 |       11.073 (  1.89x) |       12.021 (  1.74x) |
+| measure-one/frame35.pbrt                         |       20.701 |       11.030 (  1.88x) |       11.944 (  1.73x) |
+| measure-one/frame380.pbrt                        |       20.310 |       11.011 (  1.84x) |       12.048 (  1.69x) |
+| measure-one/frame52.pbrt                         |       20.463 |       11.146 (  1.84x) |       12.065 (  1.70x) |
+| measure-one/frame85.pbrt                         |       20.443 |       11.137 (  1.84x) |       12.173 (  1.68x) |
+| pbrt-book/book.pbrt                              |        0.097 |        0.024 (  4.06x) |        0.025 (  3.87x) |
+| sanmiguel/f10-8.pbrt                             |       25.660 |        4.181 (  6.14x) |        4.302 (  5.96x) |
+| sanmiguel/f16-21a.pbrt                           |       25.634 |        4.268 (  6.01x) |        4.279 (  5.99x) |
+| sanmiguel/f16-21b.pbrt                           |       25.592 |        4.202 (  6.09x) |        4.302 (  5.95x) |
+| sanmiguel/f16-21c.pbrt                           |       25.757 |        4.139 (  6.22x) |        4.287 (  6.01x) |
+| sanmiguel/f6-17.pbrt                             |       25.592 |        4.190 (  6.11x) |        4.261 (  6.01x) |
+| sanmiguel/f6-25.pbrt                             |       26.666 |        4.731 (  5.64x) |        4.569 (  5.84x) |
+| sanmiguel/sanmiguel.pbrt                         |       26.026 |        4.148 (  6.27x) |        4.265 (  6.10x) |
+| sanmiguel/sanmiguel_cam1.pbrt                    |       25.586 |        4.105 (  6.23x) |        4.268 (  5.99x) |
+| sanmiguel/sanmiguel_cam14.pbrt                   |       19.737 |        4.006 (  4.93x) |        4.126 (  4.78x) |
+| sanmiguel/sanmiguel_cam15.pbrt                   |       17.777 |        4.037 (  4.40x) |        4.060 (  4.38x) |
+| sanmiguel/sanmiguel_cam18.pbrt                   |       26.108 |        4.281 (  6.10x) |        4.277 (  6.10x) |
+| sanmiguel/sanmiguel_cam20.pbrt                   |       26.054 |        4.209 (  6.19x) |        4.292 (  6.07x) |
+| sanmiguel/sanmiguel_cam25.pbrt                   |       26.023 |        4.244 (  6.13x) |        4.372 (  5.95x) |
+| sanmiguel/sanmiguel_cam3.pbrt                    |       26.001 |        4.327 (  6.01x) |        4.329 (  6.01x) |
+| sanmiguel/sanmiguel_cam4.pbrt                    |       25.948 |        4.372 (  5.94x) |        4.367 (  5.94x) |
+| simple/anim-bluespheres.pbrt                     |        0.000 |        0.001 (  0.66x) |        0.002 (  0.19x) |
+| simple/buddha.pbrt                               |        1.678 |        0.118 ( 14.24x) |        0.109 ( 15.34x) |
+| simple/bump-sphere.pbrt                          |        0.001 |        0.001 (  0.80x) |        0.002 (  0.23x) |
+| simple/caustic-proj.pbrt                         |        0.000 |        0.001 (  0.42x) |        0.002 (  0.12x) |
+| simple/dof-dragons.pbrt                          |       13.063 |        0.330 ( 39.60x) |        0.210 ( 62.35x) |
+| simple/miscquads.pbrt                            |        0.001 |        0.001 (  0.89x) |        0.002 (  0.33x) |
+| simple/room-mlt.pbrt                             |       failed |        0.014           |        0.017           |
+| simple/room-path.pbrt                            |       failed |        0.015           |        0.018           |
+| simple/room-sppm.pbrt                            |       failed |        0.014           |        0.016           |
+| simple/spheres-differentials-texfilt.pbrt        |        0.000 |        0.001 (  0.59x) |        0.002 (  0.16x) |
+| simple/spotfog.pbrt                              |       failed |        0.001           |        0.002           |
+| simple/teapot-area-light.pbrt                    |       failed |        0.005           |        0.006           |
+| simple/teapot-metal.pbrt                         |        0.101 |        0.005 ( 20.85x) |        0.006 ( 16.10x) |
+| smoke-plume/plume-084.pbrt                       |        7.227 |        0.263 ( 27.52x) |        0.271 ( 26.63x) |
+| smoke-plume/plume-184.pbrt                       |        8.667 |        0.319 ( 27.20x) |        0.301 ( 28.77x) |
+| smoke-plume/plume-284.pbrt                       |        8.720 |        0.315 ( 27.66x) |        0.324 ( 26.89x) |
+| sportscar/f12-19a.pbrt                           |        9.486 |        1.466 (  6.47x) |        1.262 (  7.52x) |
+| sportscar/f12-19b.pbrt                           |        9.495 |        1.440 (  6.59x) |        1.230 (  7.72x) |
+| sportscar/f12-20a.pbrt                           |        9.491 |        1.446 (  6.56x) |        1.251 (  7.58x) |
+| sportscar/f12-20b.pbrt                           |        9.380 |        1.419 (  6.61x) |        1.240 (  7.57x) |
+| sportscar/f7-37a.pbrt                            |        9.381 |        1.436 (  6.53x) |        1.224 (  7.66x) |
+| sportscar/f7-37b.pbrt                            |        9.426 |        1.434 (  6.57x) |        1.229 (  7.67x) |
+| sportscar/sportscar.pbrt                         |        9.442 |        1.454 (  6.49x) |        1.222 (  7.73x) |
+| sssdragon/dragon_10.pbrt                         |       failed |        0.969           |        0.957           |
+| sssdragon/dragon_250.pbrt                        |       failed |        0.966           |        0.955           |
+| sssdragon/dragon_50.pbrt                         |       failed |        0.961           |        0.962           |
+| sssdragon/f15-7.pbrt                             |       failed |        0.961           |        0.956           |
+| structuresynth/arcsphere.pbrt                    |        0.287 |        0.014 ( 20.21x) |        0.016 ( 18.50x) |
+| structuresynth/ballpile.pbrt                     |        0.066 |        0.005 ( 12.72x) |        0.007 (  9.75x) |
+| structuresynth/metal.pbrt                        |        0.146 |        0.008 ( 19.05x) |        0.009 ( 15.73x) |
+| structuresynth/microcity.pbrt                    |        0.538 |        0.026 ( 20.59x) |        0.030 ( 18.04x) |
+| transparent-machines/frame1266.pbrt              |        8.057 |        3.509 (  2.30x) |        3.735 (  2.16x) |
+| transparent-machines/frame542.pbrt               |        3.082 |        1.297 (  2.38x) |        1.386 (  2.22x) |
+| transparent-machines/frame675.pbrt               |        3.890 |        1.710 (  2.27x) |        1.845 (  2.11x) |
+| transparent-machines/frame812.pbrt               |        5.068 |        2.262 (  2.24x) |        2.449 (  2.07x) |
+| transparent-machines/frame888.pbrt               |        5.951 |        2.646 (  2.25x) |        2.839 (  2.10x) |
+| tt/tt.pbrt                                       |        1.632 |        0.740 (  2.21x) |        0.767 (  2.13x) |
+| veach-bidir/bidir.pbrt                           |        0.009 |        0.013 (  0.66x) |        0.016 (  0.54x) |
+| veach-mis/mis.pbrt                               |        0.001 |        0.006 (  0.16x) |        0.009 (  0.11x) |
+| villa/f16-20a.pbrt                               |        5.629 |        1.816 (  3.10x) |        1.906 (  2.95x) |
+| villa/f16-20b.pbrt                               |        5.522 |        1.815 (  3.04x) |        1.894 (  2.91x) |
+| villa/f16-20c.pbrt                               |        5.580 |        1.810 (  3.08x) |        1.919 (  2.91x) |
+| villa/villa-daylight.pbrt                        |        5.425 |        1.828 (  2.97x) |        1.894 (  2.86x) |
+| villa/villa-lights-on.pbrt                       |       failed |        1.852           |        1.897           |
+| villa/villa-photons.pbrt                         |       failed |        1.816           |        1.891           |
+| volume-caustic/caustic.pbrt                      |       failed |        0.001           |        0.002           |
+| volume-caustic/f16-22a.pbrt                      |       failed |        0.001           |        0.002           |
+| volume-caustic/f16-22b.pbrt                      |       failed |        0.001           |        0.002           |
+| vw-van/vw-van.pbrt                               |        3.409 |        0.864 (  3.94x) |        0.899 (  3.79x) |
+| white-room/whiteroom-daytime.pbrt                |        1.414 |        0.662 (  2.14x) |        0.720 (  1.96x) |
+| white-room/whiteroom-night.pbrt                  |        1.404 |        0.679 (  2.07x) |        0.718 (  1.96x) |
+| yeahright/yeahright.pbrt                         |        0.169 |        0.041 (  4.14x) |        0.049 (  3.45x) |
 
 
 Results for all scenes in Benedikt Bitterli's collection
@@ -247,42 +247,44 @@ Results for all scenes in Benedikt Bitterli's collection
   parsing) any .ply files
 - pbrt-parser ran first after the prewarming step, minipbrt ran second,
   threaded ran third.
+- Results generated using a release build of pbrt-parsing-perf from commit
+  8e6750c4fb5ec2d02964c96d34e6bcfb77d89338.
 
 
 | Filename                        |  pbrt-parser |     minipbrt (Speedup) |     threaded (Speedup) |
 | :------------------------------ | -----------: | ---------------------: | ---------------------: |
-| ./bathroom/scene.pbrt           |        0.529 |        0.143 (  3.71x) |        0.044 ( 11.98x) |
-| ./bathroom2/scene.pbrt          |        1.642 |        0.169 (  9.70x) |        0.078 ( 20.96x) |
-| ./bedroom/scene.pbrt            |        1.353 |        0.246 (  5.51x) |        0.186 (  7.28x) |
-| ./car/scene.pbrt                |        0.608 |        0.111 (  5.47x) |        0.055 ( 11.00x) |
-| ./car2/scene.pbrt               |        0.829 |        0.147 (  5.63x) |        0.050 ( 16.58x) |
-| ./classroom/scene.pbrt          |        0.098 |        0.018 (  5.40x) |        0.008 ( 12.34x) |
-| ./coffee/scene.pbrt             |        0.169 |        0.030 (  5.55x) |        0.014 ( 12.23x) |
-| ./cornell-box/scene.pbrt        |        0.001 |        0.000 (  3.57x) |        0.003 (  0.48x) |
-| ./curly-hair/scene.pbrt         |      160.376 |        6.722 ( 23.86x) |        8.438 ( 19.01x) |
-| ./dining-room/scene.pbrt        |        0.495 |        0.209 (  2.37x) |        0.214 (  2.31x) |
-| ./dragon/scene.pbrt             |        1.949 |        0.246 (  7.92x) |        0.181 ( 10.77x) |
-| ./furball/scene.pbrt            |      179.320 |       11.731 ( 15.29x) |       14.717 ( 12.18x) |
-| ./glass-of-water/scene.pbrt     |        1.490 |        0.402 (  3.71x) |        0.366 (  4.07x) |
-| ./hair-curl/scene.pbrt          |      186.714 |       13.662 ( 13.67x) |       16.269 ( 11.48x) |
-| ./house/scene.pbrt              |        8.991 |        3.294 (  2.73x) |        3.284 (  2.74x) |
-| ./kitchen/scene.pbrt            |        7.494 |        3.215 (  2.33x) |        3.186 (  2.35x) |
-| ./lamp/scene.pbrt               |        3.345 |        0.922 (  3.63x) |        0.939 (  3.56x) |
-| ./living-room/scene.pbrt        |        0.854 |        0.461 (  1.85x) |        0.470 (  1.82x) |
-| ./living-room-2/scene.pbrt      |        3.168 |        1.379 (  2.30x) |        1.395 (  2.27x) |
-| ./living-room-3/scene.pbrt      |       50.233 |        2.987 ( 16.82x) |        3.580 ( 14.03x) |
-| ./material-testball/scene.pbrt  |        0.670 |        0.142 (  4.70x) |        0.145 (  4.62x) |
-| ./spaceship/scene.pbrt          |        2.708 |        1.017 (  2.66x) |        1.030 (  2.63x) |
-| ./staircase/scene.pbrt          |        1.516 |        1.816 (  0.83x) |        1.913 (  0.79x) |
-| ./staircase2/scene.pbrt         |        0.158 |        0.134 (  1.18x) |        0.138 (  1.15x) |
-| ./straight-hair/scene.pbrt      |       90.288 |        5.906 ( 15.29x) |        8.577 ( 10.53x) |
-| ./teapot/scene.pbrt             |        1.026 |        0.146 (  7.01x) |        0.145 (  7.08x) |
-| ./teapot-full/scene.pbrt        |        0.827 |        0.179 (  4.63x) |        0.190 (  4.36x) |
-| ./veach-ajar/scene.pbrt         |        2.336 |        0.478 (  4.89x) |        0.474 (  4.93x) |
-| ./veach-bidir/scene.pbrt        |        0.086 |        0.065 (  1.33x) |        0.076 (  1.13x) |
-| ./veach-mis/scene.pbrt          |        0.002 |        0.001 (  1.36x) |        0.004 (  0.43x) |
-| ./volumetric-caustic/scene.pbrt |        0.001 |        0.001 (  0.75x) |        0.004 (  0.28x) |
-| ./water-caustic/scene.pbrt      |        0.586 |        0.092 (  6.39x) |        0.096 (  6.13x) |
+| ./bathroom/scene.pbrt           |        0.532 |        0.096 (  5.56x) |        0.031 ( 16.94x) |
+| ./bathroom2/scene.pbrt          |        0.975 |        0.091 ( 10.71x) |        0.040 ( 24.63x) |
+| ./bedroom/scene.pbrt            |        1.325 |        0.138 (  9.61x) |        0.117 ( 11.35x) |
+| ./car/scene.pbrt                |        0.593 |        0.057 ( 10.41x) |        0.031 ( 19.38x) |
+| ./car2/scene.pbrt               |        0.812 |        0.077 ( 10.58x) |        0.030 ( 27.46x) |
+| ./classroom/scene.pbrt          |        0.095 |        0.011 (  8.96x) |        0.005 ( 18.39x) |
+| ./coffee/scene.pbrt             |        0.171 |        0.014 ( 12.52x) |        0.007 ( 23.57x) |
+| ./cornell-box/scene.pbrt        |        0.001 |        0.000 (  3.59x) |        0.002 (  0.78x) |
+| ./curly-hair/scene.pbrt         |      154.881 |        6.488 ( 23.87x) |        8.178 ( 18.94x) |
+| ./dining-room/scene.pbrt        |        0.517 |        0.175 (  2.95x) |        0.217 (  2.39x) |
+| ./dragon/scene.pbrt             |        1.392 |        0.179 (  7.79x) |        0.163 (  8.54x) |
+| ./furball/scene.pbrt            |      182.831 |       11.545 ( 15.84x) |       14.697 ( 12.44x) |
+| ./glass-of-water/scene.pbrt     |        1.486 |        0.318 (  4.67x) |        0.333 (  4.46x) |
+| ./hair-curl/scene.pbrt          |      182.791 |       13.354 ( 13.69x) |       16.273 ( 11.23x) |
+| ./house/scene.pbrt              |        8.910 |        3.178 (  2.80x) |        3.250 (  2.74x) |
+| ./kitchen/scene.pbrt            |        7.207 |        3.006 (  2.40x) |        3.133 (  2.30x) |
+| ./lamp/scene.pbrt               |        3.319 |        0.872 (  3.80x) |        0.878 (  3.78x) |
+| ./living-room/scene.pbrt        |        0.881 |        0.435 (  2.02x) |        0.479 (  1.84x) |
+| ./living-room-2/scene.pbrt      |        3.104 |        1.285 (  2.42x) |        1.384 (  2.24x) |
+| ./living-room-3/scene.pbrt      |       49.801 |        2.910 ( 17.11x) |        3.633 ( 13.71x) |
+| ./material-testball/scene.pbrt  |        0.663 |        0.139 (  4.77x) |        0.135 (  4.90x) |
+| ./spaceship/scene.pbrt          |        2.651 |        0.951 (  2.79x) |        0.976 (  2.72x) |
+| ./staircase/scene.pbrt          |        1.454 |        1.779 (  0.82x) |        1.888 (  0.77x) |
+| ./staircase2/scene.pbrt         |        0.167 |        0.127 (  1.31x) |        0.145 (  1.15x) |
+| ./straight-hair/scene.pbrt      |       87.454 |        6.124 ( 14.28x) |        7.878 ( 11.10x) |
+| ./teapot/scene.pbrt             |        0.743 |        0.135 (  5.52x) |        0.141 (  5.26x) |
+| ./teapot-full/scene.pbrt        |        0.763 |        0.170 (  4.48x) |        0.175 (  4.35x) |
+| ./veach-ajar/scene.pbrt         |        2.241 |        0.441 (  5.08x) |        0.456 (  4.91x) |
+| ./veach-bidir/scene.pbrt        |        0.065 |        0.067 (  0.98x) |        0.066 (  0.99x) |
+| ./veach-mis/scene.pbrt          |        0.002 |        0.001 (  1.34x) |        0.003 (  0.60x) |
+| ./volumetric-caustic/scene.pbrt |        0.001 |        0.001 (  0.77x) |        0.002 (  0.36x) |
+| ./water-caustic/scene.pbrt      |        0.553 |        0.087 (  6.39x) |        0.086 (  6.45x) |
 
 
 Results for Disney's Moana island scene
