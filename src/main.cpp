@@ -84,8 +84,8 @@ namespace vh {
   // and discard them rather than loading them into triangle meshes.
   static bool prewarm_parser(const char* filename)
   {
-    minipbrt::Parser parser;
-    bool ok = parser.parse(filename);
+    minipbrt::Loader loader;
+    bool ok = loader.load(filename);
     if (!ok) {
       return false;
     }
@@ -94,7 +94,7 @@ namespace vh {
     char* buffer = new char[bufLen + 1];
     buffer[bufLen] = '\0';
 
-    const minipbrt::Scene* scene = parser.borrow_scene();
+    const minipbrt::Scene* scene = loader.borrow_scene();
     for (uint32_t i = 0, endI = uint32_t(scene->shapes.size()); i < endI; i++) {
       if (scene->shapes[i]->type() == minipbrt::ShapeType::PLYMesh) {
         const minipbrt::PLYMesh* plymesh = dynamic_cast<const minipbrt::PLYMesh*>(scene->shapes[i]);
@@ -118,10 +118,10 @@ namespace vh {
   {
     Timer timer(true); // true --> autostart the timer.
 
-    minipbrt::Parser parser;
-    bool ok = parser.parse(filename);
+    minipbrt::Loader loader;
+    bool ok = loader.load(filename);
     if (ok) {
-      minipbrt::Scene* scene = parser.take_scene();
+      minipbrt::Scene* scene = loader.take_scene();
       ok = scene->load_all_ply_meshes();
       delete scene;
     }
@@ -137,10 +137,10 @@ namespace vh {
   {
     Timer timer(true); // true --> autostart the timer.
 
-    minipbrt::Parser parser;
-    bool ok = parser.parse(filename);
+    minipbrt::Loader loader;
+    bool ok = loader.load(filename);
     if (ok) {
-      minipbrt::Scene* scene = parser.take_scene();
+      minipbrt::Scene* scene = loader.take_scene();
 
       std::vector<uint32_t> plymeshes;
       plymeshes.reserve(scene->shapes.size());
