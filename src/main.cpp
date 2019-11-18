@@ -82,6 +82,17 @@ namespace vh {
   };
 
 
+  static int file_open(FILE** f, const char* filename, const char* mode)
+  {
+  #ifdef _WIN32
+    return fopen_s(f, filename, mode);
+  #else
+    *f = fopen(filename, mode);
+    return (*f != nullptr) ? 0 : errno;
+  #endif
+  }
+
+
   // Read the PBRT file and any additional files it references, so that they're
   // likely to be in the OS's disk cache when we run the parsing performance
   // tests. We use minipbrt for this, but just read any PLY files into memory
@@ -103,7 +114,7 @@ namespace vh {
       if (scene->shapes[i]->type() == minipbrt::ShapeType::PLYMesh) {
         const minipbrt::PLYMesh* plymesh = dynamic_cast<const minipbrt::PLYMesh*>(scene->shapes[i]);
         FILE* f = nullptr;
-        if (fopen_s(&f, plymesh->filename, "rb") != 0) {
+        if (file_open(&f, plymesh->filename, "rb") != 0) {
           continue;
         }
         while (fread(buffer, sizeof(char), bufLen, f) == bufLen) {
@@ -471,7 +482,7 @@ int main(int argc, char** argv)
   for (int i = 1; i < argc; i++) {
     if (has_extension(argv[i], "txt")) {
       FILE* f = nullptr;
-      if (fopen_s(&f, argv[i], "r") == 0) {
+      if (file_open(&f, argv[i], "r") == 0) {
         while (fgets(filenameBuffer, kFilenameBufferLen, f)) {
           filenames.push_back(filenameBuffer);
           while (filenames.back().back() == '\n') {
@@ -506,7 +517,7 @@ int main(int argc, char** argv)
 
   FILE* out = stdout;
   if (outfile != nullptr) {
-    if (fopen_s(&out, outfile, "w") != 0) {
+    if (file_open(&out, outfile, "w") != 0) {
       fprintf(stderr, "Failed to open output file %s for writing\n", outfile);
       return EXIT_FAILURE;
     }
