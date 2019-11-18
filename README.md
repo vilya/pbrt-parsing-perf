@@ -1,5 +1,5 @@
-pbrt-parser-perf: Performance comparisons of PBRT parsers
-=========================================================
+pbrt-parsing-perf: Performance comparisons of PBRT parsers
+==========================================================
 
 This project provides a command line app which parses 
 [PBRT v3 files](https://pbrt.org/fileformat-v3.html) using several different
